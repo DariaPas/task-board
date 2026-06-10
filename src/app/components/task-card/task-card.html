@@ -1,1 +1,29 @@
-<p>task-card works!</p>
+<article class="task-card" data-testid="task-card">
+  <div class="task-card__header">
+    <h3>{{ task().title }}</h3>
+
+    <span class="task-card__priority" data-testid="priority-badge">
+      {{ task().priority }}
+    </span>
+  </div>
+
+  @if (task().description) {
+    <p>{{ task().description }}</p>
+  }
+
+  <div class="task-card__actions">
+    @if (task().status !== 'todo') {
+      <button type="button" (click)="moveTo('todo')">To Do</button>
+    }
+
+    @if (task().status !== 'in-progress') {
+      <button type="button" (click)="moveTo('in-progress')">In Progress</button>
+    }
+
+    @if (task().status !== 'done') {
+      <button type="button" (click)="moveTo('done')">Done</button>
+    }
+
+    <button type="button" (click)="deleteTask()">Delete</button>
+  </div>
+</article>

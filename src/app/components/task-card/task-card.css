@@ -1,0 +1,28 @@
+.task-card {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: white;
+}
+
+.task-card__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-card__priority {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eee;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.task-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}

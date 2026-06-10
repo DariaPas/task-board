@@ -1,1 +1,15 @@
-<p>task-column works!</p>
+<section class="task-column" [attr.data-testid]="'column-' + status()">
+  <h2>{{ title() }}</h2>
+
+  <div class="task-column__list">
+    @for (task of tasks(); track task.id) {
+      <app-task-card
+        [task]="task"
+        (statusChange)="onStatusChange(task.id, $event)"
+        (delete)="onDelete($event)"
+      />
+    } @empty {
+      <p>No tasks yet.</p>
+    }
+  </div>
+</section>

@@ -1,0 +1,12 @@
+.task-column {
+  min-height: 400px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #f7f7f7;
+}
+
+.task-column__list {
+  display: grid;
+  gap: 12px;
+}
