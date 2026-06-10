@@ -1,1 +1,54 @@
-<p>task-board works!</p>
+<div class="task-board">
+  <header class="task-board__header">
+    <h1>Task Board</h1>
+
+    <button type="button" (click)="toggleForm()">
+      New Task
+    </button>
+  </header>
+
+  <label>
+    Filter Priority
+    <select
+      [value]="taskService.priorityFilter()"
+      (change)="setPriorityFilter($any($event.target).value)"
+    >
+      <option value="all">All</option>
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+  </label>
+
+  @if (showForm()) {
+    @defer {
+      <app-task-form (createTask)="addTask($event)" />
+    }
+  }
+
+  <main class="task-board__columns">
+    <app-task-column
+      title="To Do"
+      status="todo"
+      [tasks]="taskService.todoTasks()"
+      (statusChange)="moveTask($event)"
+      (delete)="deleteTask($event)"
+    />
+
+    <app-task-column
+      title="In Progress"
+      status="in-progress"
+      [tasks]="taskService.inProgressTasks()"
+      (statusChange)="moveTask($event)"
+      (delete)="deleteTask($event)"
+    />
+
+    <app-task-column
+      title="Done"
+      status="done"
+      [tasks]="taskService.doneTasks()"
+      (statusChange)="moveTask($event)"
+      (delete)="deleteTask($event)"
+    />
+  </main>
+</div>

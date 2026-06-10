@@ -1,1 +1,35 @@
-<p>task-form works!</p>
+<form class="task-form" (ngSubmit)="submit()">
+  <label>
+    Titel
+    <input
+      name="title"
+      [ngModel]="title()"
+      (ngModelChange)="title.set($event)"
+      required
+    />
+  </label>
+
+  <label>
+    Description
+    <textarea
+      name="description"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+    ></textarea>
+  </label>
+
+  <label>
+    Priority
+    <select
+      name="priority"
+      [ngModel]="priority()"
+      (ngModelChange)="priority.set($event)"
+    >
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+  </label>
+
+  <button type="submit">Erstellen</button>
+</form>
