@@ -10,7 +10,7 @@
   <label>
     Filter Priority
     <select
-      [value]="taskService.priorityFilter()"
+      [value]="taskStore.priorityFilter()"
       (change)="setPriorityFilter($any($event.target).value)"
     >
       <option value="all">All</option>
@@ -30,7 +30,7 @@
     <app-task-column
       title="To Do"
       status="todo"
-      [tasks]="taskService.todoTasks()"
+      [tasks]="taskStore.todoTasks()"
       (statusChange)="moveTask($event)"
       (delete)="deleteTask($event)"
     />
@@ -38,7 +38,7 @@
     <app-task-column
       title="In Progress"
       status="in-progress"
-      [tasks]="taskService.inProgressTasks()"
+      [tasks]="taskStore.inProgressTasks()"
       (statusChange)="moveTask($event)"
       (delete)="deleteTask($event)"
     />
@@ -46,7 +46,7 @@
     <app-task-column
       title="Done"
       status="done"
-      [tasks]="taskService.doneTasks()"
+      [tasks]="taskStore.doneTasks()"
       (statusChange)="moveTask($event)"
       (delete)="deleteTask($event)"
     />
