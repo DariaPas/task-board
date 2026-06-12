@@ -8,6 +8,11 @@ import {
     withState,
 } from '@ngrx/signals';
 import { Task, TaskPriority, TaskStatus } from '../models/task.model';
+import {
+    loadFromLocalStorage,
+    saveToLocalStorage,
+} from './local-storage.feature';
+
 
 const STORAGE_KEY = 'task-board-tasks';
 
@@ -21,19 +26,7 @@ const initialState: TaskState = {
     priorityFilter: 'all',
 };
 
-function loadTasksFromStorage(): Task[] {
-    const rawTasks = localStorage.getItem(STORAGE_KEY);
 
-    if (!rawTasks) {
-        return [];
-    }
-
-    try {
-        return JSON.parse(rawTasks) as Task[];
-    } catch {
-        return [];
-    }
-}
 
 function saveTasksToStorage(tasks: Task[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
@@ -86,7 +79,7 @@ export const TaskStore = signalStore(
             tasks: updatedTasks,
         });
 
-        saveTasksToStorage(updatedTasks);
+        saveToLocalStorage(STORAGE_KEY, updatedTasks);
         },
 
         moveTask(id: string, status: TaskStatus): void {
@@ -98,7 +91,7 @@ export const TaskStore = signalStore(
             tasks: updatedTasks,
         });
 
-        saveTasksToStorage(updatedTasks);
+        saveToLocalStorage(STORAGE_KEY, updatedTasks);
         },
 
         deleteTask(id: string): void {
@@ -108,7 +101,7 @@ export const TaskStore = signalStore(
                 tasks: updatedTasks,
             });
 
-            saveTasksToStorage(updatedTasks);
+            saveToLocalStorage(STORAGE_KEY, updatedTasks);
         },
 
         setPriorityFilter(priority: TaskPriority | 'all'): void {
@@ -121,7 +114,7 @@ export const TaskStore = signalStore(
     withHooks({
         onInit(store) {
         patchState(store, {
-            tasks: loadTasksFromStorage(),
+            tasks: loadFromLocalStorage<Task[]>(STORAGE_KEY, []),
         });
         },
     }),
