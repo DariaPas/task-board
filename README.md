@@ -1,59 +1,101 @@
-# TaskBoard
+# Task Board
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.27.
+A small Angular task board application.
 
-## Development server
+The app allows users to create tasks, move them between columns, filter them by priority, persist tasks locally, and load initial tasks from the DummyJSON API.
 
-To start a local development server, run:
+## Tech Stack
 
-```bash
-ng serve
-```
+- Angular 20
+- Standalone Components
+- Angular Signals
+- New Angular template syntax: `@if`, `@for`, `@defer`
+- NgRx SignalStore
+- RxJS interop with `rxMethod`
+- DummyJSON API
+- `localStorage` persistence
+- Playwright E2E tests
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Setup
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Install dependencies:
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+Start the development server:
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open the app:
 
-## Running unit tests
+```text
+http://localhost:4200
+```
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Run a production build:
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Run E2E tests:
 
 ```bash
-ng e2e
+npm run e2e
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Features
 
-## Additional Resources
+- Create new tasks
+- Move tasks between `To Do`, `In Progress`, and `Done`
+- Delete tasks
+- Filter tasks by priority
+- Persist tasks in `localStorage`
+- Load tasks from the DummyJSON API
+- Show loading and error states for API requests
+- Lazy-load the task form with `@defer`
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Architecture
+
+The application uses a simple component structure:
+
+```text
+App
+└── TaskBoard
+    ├── TaskColumn
+    │   └── TaskCard
+    └── TaskForm
+```
+
+`TaskBoard` acts as the container component and connects the UI to the `TaskStore`.
+
+State management is handled with NgRx SignalStore. The store contains the task list, loading state, error state, and priority filter.
+
+The store keeps one main task list. The visible column lists (`todoTasks`, `inProgressTasks`, and `doneTasks`) are derived from this list with computed signals, so they update automatically whenever the task state changes.
+
+The UI uses signal inputs and outputs for component communication. Data flows down through inputs, and events such as creating, moving, and deleting tasks flow up through outputs.
+
+## API and Persistence
+
+Initial tasks are loaded from the DummyJSON API using Angular `HttpClient`, `rxMethod`, and `tapResponse`.
+
+When a task is created, moved, or deleted, the app updates the local store immediately and saves the new task list to `localStorage`. The DummyJSON mutation endpoints are called afterwards for demonstration purposes.
+
+DummyJSON mutation endpoints are called for demonstration purposes, but DummyJSON does not persist changes permanently on the server.
+
+## Testing
+
+The project includes Playwright E2E tests covering:
+
+- Column rendering
+- Task creation
+- Moving tasks between columns
+- Priority filtering
+- `localStorage` persistence
+- API loading
+- Loading state
+- API error handling
