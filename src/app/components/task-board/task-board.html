@@ -19,6 +19,13 @@
       <option value="high">High</option>
     </select>
   </label>
+  @if (taskStore.isLoading()) {
+    <p>Loading tasks...</p>
+  }
+
+  @if (taskStore.error()) {
+    <p role="alert">{{ taskStore.error() }}</p>
+}
 
   @if (showForm()) {
     @defer {

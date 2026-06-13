@@ -42,6 +42,15 @@ type DummyTodosResponseDto = {
     limit: number;
 };
 
+type DummyMutationResponseDto = {
+    id: number;
+    todo: string;
+    completed: boolean;
+    userId?: number;
+    isDeleted?: boolean;
+    deletedOn?: string;
+};
+
 const initialState: TaskState = {
     tasks: [],
     priorityFilter: 'all',
@@ -64,6 +73,21 @@ function saveTasksToStorage(tasks: Task[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
+function mapTaskToDummyTodoPayload(task: Task): {
+    todo: string;
+    completed: boolean;
+    userId: number;
+} {
+    return {
+        todo: task.title,
+        completed: task.status === 'done',
+        userId: 1,
+    };
+}
+
+function isDummyJsonTaskId(id: string): boolean {
+    return /^\d+$/.test(id);
+}
 export const TaskStore = signalStore(
     { providedIn: 'root' },
 
@@ -98,50 +122,6 @@ export const TaskStore = signalStore(
     }),
 
     withMethods((store, http = inject(HttpClient)) => ({
-        addTask(data: Omit<Task, 'id' | 'status'>): void {
-        const newTask: Task = {
-            ...data,
-            id: crypto.randomUUID(),
-            status: 'todo',
-        };
-
-        const updatedTasks = [...store.tasks(), newTask];
-
-        patchState(store, {
-            tasks: updatedTasks,
-        });
-
-        saveToLocalStorage(STORAGE_KEY, updatedTasks);
-        },
-
-        moveTask(id: string, status: TaskStatus): void {
-            const updatedTasks = store.tasks().map((task) =>
-            task.id === id ? { ...task, status } : task,
-        );
-
-        patchState(store, {
-            tasks: updatedTasks,
-        });
-
-        saveToLocalStorage(STORAGE_KEY, updatedTasks);
-        },
-
-        deleteTask(id: string): void {
-            const updatedTasks = store.tasks().filter((task) => task.id !== id);
-
-            patchState(store, {
-                tasks: updatedTasks,
-            });
-
-            saveToLocalStorage(STORAGE_KEY, updatedTasks);
-        },
-
-        setPriorityFilter(priority: TaskPriority | 'all'): void {
-            patchState(store, {
-                priorityFilter: priority,
-            });
-        },
-
         loadTasksFromApi: rxMethod<void>(
             pipe(
             tap(() => {
@@ -181,8 +161,121 @@ export const TaskStore = signalStore(
                 }),
             ),),),
         ),
-    })),
 
+        createTaskOnApi: rxMethod<Task>(
+            pipe(
+                switchMap((task) =>
+                http.post<DummyMutationResponseDto>('https://dummyjson.com/todos/add',
+                mapTaskToDummyTodoPayload(task),
+                ).pipe(
+                tapResponse({
+                    next: () => {
+                        console.log('Task creation simulated on API for task:', task);
+                    },
+                    error: () => {
+                        patchState(store, {
+                        error: 'Task could not be created on API.',
+                        });
+                    },
+                }),),
+                ),
+            ),
+        ),
+
+        updateTaskOnApi: rxMethod<Task>(
+            pipe(
+                switchMap((task) =>
+                http.put<DummyMutationResponseDto>(`https://dummyjson.com/todos/${task.id}`,
+                mapTaskToDummyTodoPayload(task),
+                ).pipe(
+                tapResponse({
+                    next: () => {
+                        console.log('Task update simulated on API for task:', task);
+                    },
+                    error: () => {
+                        patchState(store, {
+                            error: 'Task could not be updated on API.',
+                        });
+                    },
+                }),),),
+            ),
+        ),
+
+        deleteTaskFromApi: rxMethod<string>(
+        pipe(
+            switchMap((id) =>
+            http.delete<DummyMutationResponseDto>(`https://dummyjson.com/todos/${id}`,
+            ).pipe(
+            tapResponse({
+                next: () => {
+                    console.log('Task deletion simulated on API for task ID:', id);
+                },
+                error: () => {
+                    patchState(store, {
+                        error: 'Task could not be deleted on API.',
+                    });
+                },
+            }),),),
+        ),),
+
+
+    })),
+    withMethods((store) => ({
+        addTask(data: Omit<Task, 'id' | 'status'>): void {
+        const newTask: Task = {
+            ...data,
+            id: crypto.randomUUID(),
+            status: 'todo',
+        };
+
+        const updatedTasks = [...store.tasks(), newTask];
+
+        patchState(store, {
+            tasks: updatedTasks,
+        });
+
+        saveToLocalStorage(STORAGE_KEY, updatedTasks);
+        store.createTaskOnApi(newTask);
+        },
+
+        moveTask(id: string, status: TaskStatus): void {
+            const updatedTasks = store.tasks().map((task) =>
+            task.id === id ? { ...task, status } : task,
+        );
+
+        const updatedTask = updatedTasks.find((task) => task.id === id);
+
+        patchState(store, {
+            tasks: updatedTasks,
+        });
+
+        saveToLocalStorage(STORAGE_KEY, updatedTasks);
+        if (updatedTask && isDummyJsonTaskId(updatedTask.id)) {
+            store.updateTaskOnApi(updatedTask);
+        }
+        },
+
+        deleteTask(id: string): void {
+            const updatedTasks = store.tasks().filter((task) => task.id !== id);
+
+            patchState(store, {
+                tasks: updatedTasks,
+            });
+
+            saveToLocalStorage(STORAGE_KEY, updatedTasks);
+            if (isDummyJsonTaskId(id)) {
+                store.deleteTaskFromApi(id);
+            }
+        },
+
+        setPriorityFilter(priority: TaskPriority | 'all'): void {
+            patchState(store, {
+                priorityFilter: priority,
+            });
+        },
+
+
+    })),
     withHooks({
         onInit(store) {
         patchState(store, {
